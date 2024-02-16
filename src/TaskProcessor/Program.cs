@@ -13,6 +13,7 @@ using System.Data.Common;
 using System.Reflection;
 using System.Threading.Tasks;
 using TaskProcessor.DbContexts;
+using TaskProcessor.Services;
 
 namespace TaskProcessor
 {
@@ -34,7 +35,7 @@ namespace TaskProcessor
             }
             catch (Exception ex)
             {
-                m_logger.Fatal(ex, "Unhandled exception!");
+                m_logger.Fatal(ex, "Unhandled exception! ");
             }
 
             m_logger.Info("Shutting down");
@@ -58,6 +59,8 @@ namespace TaskProcessor
             builder.Services.AddDbContext<ProcessingContext>(options =>
                 options.UseNpgsql(dataSource)
             );
+
+            builder.Services.AddSingleton<TaskProcessorService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

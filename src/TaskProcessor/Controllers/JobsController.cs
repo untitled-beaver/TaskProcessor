@@ -6,6 +6,7 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using TaskProcessor.DbContexts;
+using TaskProcessor.Services;
 
 namespace TaskProcessor.Controllers
 {
@@ -15,10 +16,12 @@ namespace TaskProcessor.Controllers
     {
         private readonly Logger m_logger = LogManager.GetCurrentClassLogger();
         private readonly ProcessingContext m_processingContext;
+        private readonly TaskProcessorService m_taskProcessorService;
 
-        public JobsController(ProcessingContext processingContext)
+        public JobsController(ProcessingContext processingContext, TaskProcessorService taskProcessorService)
         {
             m_processingContext = processingContext;
+            m_taskProcessorService = taskProcessorService;
         }
 
         // GET task/{id}
@@ -63,6 +66,8 @@ namespace TaskProcessor.Controllers
                 await m_processingContext.SaveChangesAsync();
 
                 m_logger.Info("Task with id {Id} has been created", newJob.Id);
+
+                m_taskProcessorService.ProcessJob(newJob);
 
                 return Accepted(newJob.Id);
             }

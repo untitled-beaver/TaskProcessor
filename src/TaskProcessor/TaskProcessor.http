@@ -1,5 +1,5 @@
 @TaskProcessor_HostAddress = http://localhost:5011
-@TaskId = 8ba5e07b-9a89-47b0-b3f0-a65c33bbe0ec
+@TaskId = 54616af0-cac6-4d1d-9ab7-5e26dac620a9
 
 # Should return 400 Bad Request
 GET {{TaskProcessor_HostAddress}}/task
@@ -13,7 +13,7 @@ Accept: application/json
 
 ###
 
-# Should return created task
+# Returns status of task
 GET {{TaskProcessor_HostAddress}}/task/{{TaskId}}
 Accept: application/json
 
