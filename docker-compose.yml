@@ -1,0 +1,21 @@
+version: "2.1"
+services:
+  postgresdb:
+    image: postgres:15.2
+    restart: unless-stopped
+    ports:
+      - 5432:5432/tcp
+    volumes:
+      - ./docker-data/postgres:/var/lib/postgresql/data/:z
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRESS_PASSWORD}
+      POSTGRES_DB: ${POSTGRESS_DB_NAME}
+      POSTGRES_USER: ${POSTGRESS_DB_USER}
+    command: postgres -c 'max_connections=100'
+
+#volumes:
+#  postgres-vol:
+#    driver_opts:
+#      type: none
+#      device: ${PWD}/docker-data/postgres
+#      o: bind
