@@ -2,7 +2,7 @@
 using System.Text.Json.Serialization;
 using TaskProcessor.DbContexts;
 
-namespace TaskProcessor.Controllers
+namespace TaskProcessor.Contracts
 {
     public class JobResponse
     {
