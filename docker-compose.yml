@@ -6,7 +6,8 @@ services:
     ports:
       - 5432:5432/tcp
     volumes:
-      - ./docker-data/postgres:/var/lib/postgresql/data/:z
+      - ./docker-data/postgres:/var/lib/postgresql/data/
+      - ./deploy/postgres-initial-state.sql:/docker-entrypoint-initdb.d/
     environment:
       POSTGRES_PASSWORD: ${POSTGRESS_PASSWORD}
       POSTGRES_DB: ${POSTGRESS_DB_NAME}

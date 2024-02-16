@@ -1,13 +1,18 @@
 
 using Microsoft.AspNetCore.Builder;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NLog;
 using NLog.Web;
+using Npgsql;
 using System;
+using System.Data.Common;
 using System.Reflection;
 using System.Threading.Tasks;
+using TaskProcessor.DbContexts;
 
 namespace TaskProcessor
 {
@@ -43,7 +48,16 @@ namespace TaskProcessor
             builder.Logging.SetMinimumLevel(Microsoft.Extensions.Logging.LogLevel.Information);
             builder.Host.UseNLog();
 
-            // Add services to the container.
+            ApplicationConfiguration applicationConfiguration = ApplicationConfiguration.Load(builder.Environment);
+            builder.Services.AddSingleton(applicationConfiguration);
+
+            NpgsqlDataSourceBuilder dataSourceBuilder = new NpgsqlDataSourceBuilder(applicationConfiguration.DbConnectionString);
+            dataSourceBuilder.MapEnum<Job.JobStatus>("task_status");
+            NpgsqlDataSource dataSource = dataSourceBuilder.Build();
+
+            builder.Services.AddDbContext<ProcessingContext>(options =>
+                options.UseNpgsql(dataSource)
+            );
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -66,7 +80,7 @@ namespace TaskProcessor
             await app.RunAsync();
         }
 
-        private static void TaskScheduler_UnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+        private static void TaskScheduler_UnobservedTaskException(object sender, UnobservedTaskExceptionEventArgs e)
         {
             m_logger.Fatal(e.Exception, "Got UnobservedTaskException. Shutting down!");
 

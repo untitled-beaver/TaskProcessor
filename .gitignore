@@ -404,3 +404,4 @@ FodyWeavers.xsd
 # Custom
 .env
 docker-data/postgres
+appsettings.Development.json
