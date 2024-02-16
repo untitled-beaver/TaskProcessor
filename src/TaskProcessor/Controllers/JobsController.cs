@@ -53,7 +53,7 @@ namespace TaskProcessor.Controllers
             }
         }
 
-        // POST api/<JobsController>
+        // POST /task
         [HttpPost("/task")]
         [Produces("application/json")]
         [SwaggerOperation("Creates a new task for processing")]
