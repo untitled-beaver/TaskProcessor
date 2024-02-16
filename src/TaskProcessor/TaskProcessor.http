@@ -1,5 +1,6 @@
-@TaskProcessor_HostAddress = http://localhost:5011
-@TaskId = 54616af0-cac6-4d1d-9ab7-5e26dac620a9
+#@TaskProcessor_HostAddress = http://localhost:5011
+@TaskProcessor_HostAddress = http://127.0.0.1:8080
+@TaskId = 0bcc8ed3-9830-46f3-9518-d1f811421447
 
 # Should return 400 Bad Request
 GET {{TaskProcessor_HostAddress}}/task

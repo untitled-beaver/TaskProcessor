@@ -14,6 +14,7 @@ using Npgsql;
 using System;
 using System.Data.Common;
 using System.Reflection;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using TaskProcessor.DbContexts;
 using TaskProcessor.Services;
@@ -66,7 +67,12 @@ namespace TaskProcessor
 
             builder.Services.AddSingleton<TaskProcessorService>();
 
-            builder.Services.AddControllers();
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                {
+                    options.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+                });
+
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
@@ -74,15 +80,10 @@ namespace TaskProcessor
                 options.EnableAnnotations();
             });
 
-
             WebApplication app = builder.Build();
 
-            // Configure the HTTP request pipeline.
-            if (app.Environment.IsDevelopment())
-            {
-                app.UseSwagger();
-                app.UseSwaggerUI();
-            }
+            app.UseSwagger();
+            app.UseSwaggerUI();
 
             app.UseAuthorization();
 

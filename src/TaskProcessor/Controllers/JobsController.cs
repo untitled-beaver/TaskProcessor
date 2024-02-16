@@ -5,6 +5,7 @@ using NLog;
 using Swashbuckle.AspNetCore.Annotations;
 using System;
 using System.Threading.Tasks;
+using TaskProcessor.Contracts;
 using TaskProcessor.DbContexts;
 using TaskProcessor.Services;
 
@@ -27,16 +28,16 @@ namespace TaskProcessor.Controllers
         // GET task/{id}
         // e.g. task/8ba5e07b-9a89-47b0-b3f0-a65c33bbe0ec
         [HttpGet("{id?}")]
-        [Produces("text/plain")]
+        [Produces("application/json")]
         [SwaggerOperation("Returns status of task by id")]
-        [SwaggerResponse(StatusCodes.Status200OK, "Task was found and status is returned", typeof(string))]
-        [SwaggerResponse(StatusCodes.Status404NotFound, "Task was not found", typeof(string))]
-        [SwaggerResponse(StatusCodes.Status400BadRequest, "Task id is not set", typeof(string))]
+        [SwaggerResponse(StatusCodes.Status200OK, "Task was found and status is returned", typeof(JobResponse))]
+        [SwaggerResponse(StatusCodes.Status404NotFound, "Task was not found", typeof(JobResponse))]
+        [SwaggerResponse(StatusCodes.Status400BadRequest, "Task id is not set", typeof(JobResponse))]
         public async Task<IActionResult> Get([FromRoute] Guid? id)
         {
             if (id == null)
             {
-                return BadRequest("Task id is empty");
+                return BadRequest(JobResponse.FromError("Task id is empty"));
             }
 
             m_logger.Info("Returning information about task {Id}", id);
@@ -44,19 +45,19 @@ namespace TaskProcessor.Controllers
             Job job = await m_processingContext.Jobs.FirstOrDefaultAsync(x => x.Id == id);
             if (job == null)
             {
-                return NotFound($"Task with id {id} not found");
+                return NotFound(JobResponse.FromError($"Task with id {id} not found"));
             }
             else
             {
-                return Ok(job.Status.ToStringFast());
+                return Ok(JobResponse.MapFromJob(job));
             }
         }
 
         // POST api/<JobsController>
         [HttpPost("/task")]
-        [Produces("text/plain")]
+        [Produces("application/json")]
         [SwaggerOperation("Creates a new task for processing")]
-        [SwaggerResponse(StatusCodes.Status202Accepted, "Task was successfully created", typeof(string))]
+        [SwaggerResponse(StatusCodes.Status202Accepted, "Task was successfully created", typeof(JobCreatedResponse))]
         public async Task<IActionResult> Post()
         {
             m_logger.Info("Creating new task");
@@ -77,12 +78,12 @@ namespace TaskProcessor.Controllers
 
                 m_taskProcessorService.ProcessJob(newJob);
 
-                return Accepted(newJob.Id);
+                return Accepted(JobCreatedResponse.FromJob(newJob));
             }
             catch (Exception ex)
             {
                 m_logger.Error(ex, "Failed to create a new task");
-                return StatusCode(StatusCodes.Status500InternalServerError);
+                return StatusCode(StatusCodes.Status500InternalServerError, JobCreatedResponse.FromErrorMessage("Failed to create a new task"));
             }
         }
     }
