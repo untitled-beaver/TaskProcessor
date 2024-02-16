@@ -1,10 +1,13 @@
 
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Formatters;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Mono.TextTemplating;
 using NLog;
 using NLog.Web;
 using Npgsql;
@@ -57,15 +60,20 @@ namespace TaskProcessor
             NpgsqlDataSource dataSource = dataSourceBuilder.Build();
 
             builder.Services.AddDbContext<ProcessingContext>(options =>
-                options.UseNpgsql(dataSource)
-            );
+            {
+                options.UseNpgsql(dataSource);
+            });
 
             builder.Services.AddSingleton<TaskProcessorService>();
 
             builder.Services.AddControllers();
             // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
             builder.Services.AddEndpointsApiExplorer();
-            builder.Services.AddSwaggerGen();
+            builder.Services.AddSwaggerGen(options =>
+            {
+                options.EnableAnnotations();
+            });
+
 
             WebApplication app = builder.Build();
 
