@@ -7,6 +7,3 @@ CREATE TABLE public.tasks
     status task_status NOT NULL,
     PRIMARY KEY (id)
 );
-
---ALTER TABLE IF EXISTS public.tasks
---    OWNER to processor;
