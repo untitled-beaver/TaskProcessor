@@ -7,16 +7,30 @@ services:
       - 5432:5432/tcp
     volumes:
       - ./docker-data/postgres:/var/lib/postgresql/data/
-      - ./deploy/postgres-initial-state.sql:/docker-entrypoint-initdb.d/
+      - ./deploy/postgres-initial-state.sql:/docker-entrypoint-initdb.d/postgres-initial-state.sql:ro
     environment:
       POSTGRES_PASSWORD: ${POSTGRESS_PASSWORD}
       POSTGRES_DB: ${POSTGRESS_DB_NAME}
       POSTGRES_USER: ${POSTGRESS_DB_USER}
     command: postgres -c 'max_connections=100'
 
-#volumes:
-#  postgres-vol:
-#    driver_opts:
-#      type: none
-#      device: ${PWD}/docker-data/postgres
-#      o: bind
+  api:
+    image: task_processor_api
+    build:
+      context: src/
+      dockerfile: TaskProcessor/Dockerfile
+    command: dotnet TaskProcessor.dll
+    volumes:
+      - ./docker-data/logs/:/app/logs/
+    container_name: task-processor-api
+    restart: unless-stopped
+    environment:
+      - TASK_PROCESSOR_DbConnectionSettings:Hostname=postgresdb
+      - TASK_PROCESSOR_DbConnectionSettings:Port=5432
+      - TASK_PROCESSOR_DbConnectionSettings:Database=${POSTGRESS_DB_NAME}
+      - TASK_PROCESSOR_DbConnectionSettings:Username=${POSTGRESS_DB_USER}
+      - TASK_PROCESSOR_DbConnectionSettings:Password=${POSTGRESS_PASSWORD}
+    depends_on:
+      - postgresdb
+    ports:
+      - 8080:8080/tcp
